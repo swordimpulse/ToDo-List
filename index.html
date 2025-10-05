@@ -9,20 +9,23 @@
     --bg:#fafafa; --card:#fff; --accent:#0a84ff;
     --danger:#ff3b30; --warn:#ffcc00; --muted:#666;
     --success:#22c55e;
+    --pinyellow:#ffd700;
     --radius:12px;
   }
   html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Hiragino Kaku Gothic ProN",Meiryo;background:var(--bg);color:#111}
   .wrap{max-width:420px;margin:8px auto;padding:12px}
   header{display:flex;align-items:center;gap:12px}
   h1{font-size:20px;margin:0}
-  .card{background:var(--card);border-radius:var(--radius);box-shadow:0 1px 6px rgba(0,0,0,.06);padding:12px;margin-top:10px;border:1px solid #eee}
+  .card{background:var(--card);border-radius:var(--radius);box-shadow:0 1px 6px rgba(0,0,0,.06);padding:12px;margin-top:10px;border:1px solid #eee;overflow:hidden}
   label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+  /* set inputs to 16px to avoid iOS input zoom */
   input[type="text"], input[type="datetime-local"], textarea, select{
-    width:100%;padding:10px;border:1px solid #e6e6e6;border-radius:10px;font-size:15px;box-sizing:border-box;
+    width:100%;padding:10px;border:1px solid #e6e6e6;border-radius:10px;font-size:16px;box-sizing:border-box;
   }
   textarea{min-height:70px;resize:vertical}
   .row{display:flex;gap:8px;align-items:center}
-  .btn{padding:9px 12px;border-radius:10px;border:none;background:var(--accent);color:white;font-weight:600;font-size:14px}
+  .btn{padding:11px 14px;border-radius:10px;border:none;background:var(--accent);color:white;font-weight:600;font-size:16px}
+  /* Make Add / Clear All slightly larger: use same .btn (applied) */
   .btn.secondary{background:#e6e6e6;color:#111}
   .list{margin-top:10px}
   .todo{display:flex;flex-direction:column;gap:8px;padding:10px;border-radius:10px;border:1px solid #eee;margin-bottom:8px;background:#fff}
@@ -30,12 +33,14 @@
   .left{flex:1;min-width:0;cursor:default}
   .title{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .meta{font-size:12px;color:var(--muted)}
-  .controls{display:flex;gap:6px}
-  .smallBtn{padding:6px 8px;font-size:13px;border-radius:8px;border:1px solid #ddd;background:#fff;cursor:pointer}
-  .pinBtn{background:#fff;border:1px solid #ffd700}
-  .pinBtn.pinned{background:#ffd700}
-  .completeBtn{background:var(--success);color:#fff;border:none}
-  .deleteBtn{background:var(--danger);color:#fff;border:none}
+  .controls{display:flex;gap:6px;align-items:center}
+  .smallBtn{padding:6px 8px;font-size:13px;border-radius:8px;border:1px solid #ddd;background:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+  .pinBtn{background:#fff;border:1px solid var(--pinyellow);min-width:36px;height:36px;border-radius:8px}
+  .pinBtn.pinned{background:var(--pinyellow)}
+  /* complete = larger square button */
+  .completeBtn{background:var(--success);color:#fff;border:none;width:40px;height:40px;border-radius:8px;font-size:18px;display:inline-flex;align-items:center;justify-content:center}
+  /* delete = smaller circular button */
+  .deleteBtn{background:var(--danger);color:#fff;border:none;width:30px;height:30px;border-radius:6px;font-size:14px;display:inline-flex;align-items:center;justify-content:center}
   .completed .title{text-decoration:line-through;color:#999}
   .tag-danger{background:var(--danger);color:#fff;padding:4px 6px;border-radius:6px;font-size:12px}
   .tag-warn{background:var(--warn);color:#111;padding:4px 6px;border-radius:6px;font-size:12px}
@@ -43,11 +48,17 @@
   .muted{color:var(--muted);font-size:13px}
   .expired-card{border-color:var(--danger);}
   .memo{background:#f7f7f7;padding:8px;border-radius:8px;font-size:14px;color:#222;border:1px dashed #eee}
-  .small-select{font-size:13px;padding:6px;border-radius:8px;width:170px}
+  .small-select{font-size:14px;padding:6px;border-radius:8px;width:170px}
   @media (max-width:380px){
     .wrap{padding:10px}
-    .btn{font-size:13px;padding:8px}
-    .small-select{width:140px}
+    /* smaller screens: stack controls in creator to avoid overflow */
+    .card#creator .row {flex-direction:column;align-items:stretch}
+    .small-select{width:140px;font-size:14px}
+    /* make buttons a bit taller for easier tap */
+    .btn{font-size:17px;padding:12px}
+    /* ensure datetime input stays within box */
+    input[type="datetime-local"]{width:100%;min-width:0}
+    .pinBtn{min-width:36px;height:36px}
   }
 </style>
 </head>
@@ -295,8 +306,8 @@
 
     if (!isExpired){
       const tag = getColorTag(t);
-      if (tag === 'danger'){ const s = document.createElement('span'); s.className='tag-danger'; s.textContent='期限24h以内'; s.style.marginLeft='8px'; meta.appendChild(s); }
-      else if (tag === 'warn'){ const s = document.createElement('span'); s.className='tag-warn'; s.textContent='期限3日以内'; s.style.marginLeft='8px'; meta.appendChild(s); }
+      if (tag === 'danger'){ const s = document.createElement('span'); s.className='tag-danger'; s.textContent='1日以内'; s.style.marginLeft='8px'; meta.appendChild(s); }
+      else if (tag === 'warn'){ const s = document.createElement('span'); s.className='tag-warn'; s.textContent='3日以内'; s.style.marginLeft='8px'; meta.appendChild(s); }
     } else {
       const span = document.createElement('span'); span.style.marginLeft='8px'; span.style.color='#b00'; span.textContent='(期限超過)';
       meta.appendChild(span);
@@ -312,12 +323,12 @@
     pinBtn.onclick = (ev) => { ev.stopPropagation(); togglePin(t.id); };
     controls.appendChild(pinBtn);
 
-    const completeBtn = document.createElement('button'); completeBtn.className='smallBtn completeBtn'; completeBtn.textContent = '✓';
+    const completeBtn = document.createElement('button'); completeBtn.className='completeBtn'; completeBtn.textContent = '✓';
     completeBtn.title = '完了';
     completeBtn.onclick = (ev) => { ev.stopPropagation(); markComplete(t.id); };
     controls.appendChild(completeBtn);
 
-    const deleteBtn = document.createElement('button'); deleteBtn.className='smallBtn deleteBtn'; deleteBtn.textContent = '✖';
+    const deleteBtn = document.createElement('button'); deleteBtn.className='deleteBtn'; deleteBtn.textContent = '✖';
     deleteBtn.title = '削除';
     deleteBtn.onclick = (ev) => { ev.stopPropagation(); if (confirm('Delete this ToDo?')) deleteTodo(t.id); };
     controls.appendChild(deleteBtn);
