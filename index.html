@@ -35,12 +35,57 @@
   .meta{font-size:12px;color:var(--muted)}
   .controls{display:flex;gap:6px;align-items:center}
   .smallBtn{padding:6px 8px;font-size:13px;border-radius:8px;border:1px solid #ddd;background:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
-  .pinBtn{background:#fff;border:1px solid var(--pinyellow);min-width:36px;height:36px;border-radius:8px}
-  .pinBtn.pinned{background:var(--pinyellow)}
-  /* complete = larger square button */
-  .completeBtn{background:var(--success);color:#fff;border:none;width:40px;height:40px;border-radius:8px;font-size:18px;display:inline-flex;align-items:center;justify-content:center}
-  /* delete = smaller circular button */
-  .deleteBtn{background:var(--danger);color:#fff;border:none;width:30px;height:30px;border-radius:6px;font-size:14px;display:inline-flex;align-items:center;justify-content:center}
+/* 置き換え用 CSS — pin / complete / delete を高さ揃え（横幅のみ差） */
+:root{
+  /* コントロール共通の高さ（ピンボタンと同じにする） */
+  --ctrl-h: 36px;
+}
+
+/* ピンボタン（既存とほぼ同じ。ただし高さは変数で統一） */
+.pinBtn{
+  background:#fff;
+  border:1px solid var(--pinyellow);
+  min-width:36px;
+  height:var(--ctrl-h);
+  border-radius:8px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:0 8px;
+}
+
+/* ピンが有効なときの色 */
+.pinBtn.pinned{
+  background:var(--pinyellow);
+}
+
+/* 完了ボタン — 縦は var(--ctrl-h) に揃え、横幅を大きめに */
+.completeBtn{
+  background:var(--success);
+  color:#fff;
+  border:none;
+  width:48px;       /* 横幅（大きめ） */
+  height:var(--ctrl-h); /* 縦はピンと同じ */
+  border-radius:8px;
+  font-size:18px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+
+/* 削除ボタン — 縦は var(--ctrl-h) に揃え、横幅を小さめに */
+.deleteBtn{
+  background:var(--danger);
+  color:#fff;
+  border:none;
+  width:26px;       /* 横幅（小さめ） */
+  height:var(--ctrl-h); /* 縦はピンと同じ */
+  border-radius:6px;
+  font-size:14px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
   .completed .title{text-decoration:line-through;color:#999}
   .tag-danger{background:var(--danger);color:#fff;padding:4px 6px;border-radius:6px;font-size:12px}
   .tag-warn{background:var(--warn);color:#111;padding:4px 6px;border-radius:6px;font-size:12px}
@@ -426,3 +471,4 @@
 </script>
 </body>
 </html>
+
