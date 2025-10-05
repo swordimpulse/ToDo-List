@@ -5,27 +5,36 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ToDo</title>
 <style>
+  /* global box sizing to avoid unexpected overflow */
+  *,*::before,*::after{box-sizing:border-box}
   :root{
     --bg:#fafafa; --card:#fff; --accent:#0a84ff;
     --danger:#ff3b30; --warn:#ffcc00; --muted:#666;
     --success:#22c55e;
     --pinyellow:#ffd700;
     --radius:12px;
+    --ctrl-h:36px; /* control height shared */
   }
   html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Hiragino Kaku Gothic ProN",Meiryo;background:var(--bg);color:#111}
   .wrap{max-width:420px;margin:8px auto;padding:12px}
   header{display:flex;align-items:center;gap:12px}
   h1{font-size:20px;margin:0}
-  .card{background:var(--card);border-radius:var(--radius);box-shadow:0 1px 6px rgba(0,0,0,.06);padding:12px;margin-top:10px;border:1px solid #eee;overflow:hidden}
+  .card{background:var(--card);border-radius:var(--radius);box-shadow:0 1px 6px rgba(0,0,0,.06);padding:12px;margin-top:10px;border:1px solid #eee;overflow:visible}
   label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
-  /* set inputs to 16px to avoid iOS input zoom */
+  /* inputs at 16px to avoid iOS zoom; ensure they don't force width overflow */
   input[type="text"], input[type="datetime-local"], textarea, select{
     width:100%;padding:10px;border:1px solid #e6e6e6;border-radius:10px;font-size:16px;box-sizing:border-box;
+  }
+  /* extra safety for datetime on iOS */
+  input[type="datetime-local"]{
+    max-width:100%;
+    min-width:0;
+    -webkit-appearance:none; /* prevent UA styling that may expand */
+    appearance:none;
   }
   textarea{min-height:70px;resize:vertical}
   .row{display:flex;gap:8px;align-items:center}
   .btn{padding:11px 14px;border-radius:10px;border:none;background:var(--accent);color:white;font-weight:600;font-size:16px}
-  /* Make Add / Clear All slightly larger: use same .btn (applied) */
   .btn.secondary{background:#e6e6e6;color:#111}
   .list{margin-top:10px}
   .todo{display:flex;flex-direction:column;gap:8px;padding:10px;border-radius:10px;border:1px solid #eee;margin-bottom:8px;background:#fff}
@@ -35,57 +44,44 @@
   .meta{font-size:12px;color:var(--muted)}
   .controls{display:flex;gap:6px;align-items:center}
   .smallBtn{padding:6px 8px;font-size:13px;border-radius:8px;border:1px solid #ddd;background:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
-/* 置き換え用 CSS — pin / complete / delete を高さ揃え（横幅のみ差） */
-:root{
-  /* コントロール共通の高さ（ピンボタンと同じにする） */
-  --ctrl-h: 36px;
-}
-
-/* ピンボタン（既存とほぼ同じ。ただし高さは変数で統一） */
-.pinBtn{
-  background:#fff;
-  border:1px solid var(--pinyellow);
-  min-width:36px;
-  height:var(--ctrl-h);
-  border-radius:8px;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  padding:0 8px;
-}
-
-/* ピンが有効なときの色 */
-.pinBtn.pinned{
-  background:var(--pinyellow);
-}
-
-/* 完了ボタン — 縦は var(--ctrl-h) に揃え、横幅を大きめに */
-.completeBtn{
-  background:var(--success);
-  color:#fff;
-  border:none;
-  width:36px;       /* 横幅（大きめ） */
-  height:var(--ctrl-h); /* 縦はピンと同じ */
-  border-radius:8px;
-  font-size:18px;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-}
-
-/* 削除ボタン — 縦は var(--ctrl-h) に揃え、横幅を小さめに */
-.deleteBtn{
-  background:var(--danger);
-  color:#fff;
-  border:none;
-  width:26px;       /* 横幅（小さめ） */
-  height:var(--ctrl-h); /* 縦はピンと同じ */
-  border-radius:6px;
-  font-size:14px;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-}
+  /* pin / complete / delete controls — height unified, width adjustable */
+  .pinBtn{
+    background:#fff;
+    border:1px solid var(--pinyellow);
+    min-width:36px;
+    height:var(--ctrl-h);
+    border-radius:8px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:0 8px;
+    font-size:16px;
+  }
+  .pinBtn.pinned{background:var(--pinyellow)}
+  .completeBtn{
+    background:var(--success);
+    color:#fff;
+    border:none;
+    width:48px;       /* 横幅だけ変える（大） */
+    height:var(--ctrl-h); /* 高さは pin と同じ */
+    border-radius:8px;
+    font-size:18px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .deleteBtn{
+    background:var(--danger);
+    color:#fff;
+    border:none;
+    width:28px;       /* 横幅だけ変える（小） */
+    height:var(--ctrl-h); /* 高さは pin と同じ */
+    border-radius:6px;
+    font-size:14px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+  }
   .completed .title{text-decoration:line-through;color:#999}
   .tag-danger{background:var(--danger);color:#fff;padding:4px 6px;border-radius:6px;font-size:12px}
   .tag-warn{background:var(--warn);color:#111;padding:4px 6px;border-radius:6px;font-size:12px}
@@ -94,16 +90,21 @@
   .expired-card{border-color:var(--danger);}
   .memo{background:#f7f7f7;padding:8px;border-radius:8px;font-size:14px;color:#222;border:1px dashed #eee}
   .small-select{font-size:14px;padding:6px;border-radius:8px;width:170px}
+  /* Creator collapse styles */
+  .creator-header{display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+  .creator-toggle{background:transparent;border:none;font-size:14px;color:var(--muted)}
+  .creator-body{overflow:hidden;transition:max-height .28s ease;padding-top:8px}
+  .creator-body.collapsed{max-height:0;padding-top:0}
+  .creator-body.expanded{max-height:800px} /* sufficiently large */
   @media (max-width:380px){
     .wrap{padding:10px}
-    /* smaller screens: stack controls in creator to avoid overflow */
+    /* stack creator buttons on small screens to avoid overflow */
     .card#creator .row {flex-direction:column;align-items:stretch}
     .small-select{width:140px;font-size:14px}
-    /* make buttons a bit taller for easier tap */
     .btn{font-size:17px;padding:12px}
     /* ensure datetime input stays within box */
     input[type="datetime-local"]{width:100%;min-width:0}
-    .pinBtn{min-width:36px;height:36px}
+    .pinBtn{min-width:36px;height:var(--ctrl-h)}
   }
 </style>
 </head>
@@ -113,16 +114,24 @@
       <h1>ToDo</h1>
     </header>
 
-    <div class="card" id="creator">
-      <label for="title">New ToDo</label>
-      <input id="title" type="text" placeholder="タイトル" />
-      <label for="memo">メモ（オプション）</label>
-      <textarea id="memo" placeholder=""></textarea>
-      <label for="deadline">期限</label>
-      <input id="deadline" type="datetime-local" />
-      <div style="margin-top:8px" class="row">
-        <button id="addBtn" class="btn">Add</button>
-        <button id="clearAll" class="btn secondary">Clear All</button>
+    <!-- Creator: header clickable to toggle body -->
+    <div class="card" id="creator" aria-expanded="false">
+      <div class="creator-header" id="creatorHeader" role="button" tabindex="0" aria-controls="creatorBody" aria-expanded="false">
+        <div style="font-weight:700">New ToDo</div>
+        <button class="creator-toggle" id="creatorToggle" aria-label="展開/収納">＋</button>
+      </div>
+
+      <div id="creatorBody" class="creator-body collapsed">
+        <label for="title">New ToDo</label>
+        <input id="title" type="text" placeholder="タイトル" autocomplete="off" />
+        <label for="memo">メモ（オプション）</label>
+        <textarea id="memo" placeholder=""></textarea>
+        <label for="deadline">期限</label>
+        <input id="deadline" type="datetime-local" />
+        <div style="margin-top:8px" class="row">
+          <button id="addBtn" class="btn">Add</button>
+          <button id="clearAll" class="btn secondary">Clear All</button>
+        </div>
       </div>
     </div>
 
@@ -162,7 +171,12 @@
 (() => {
   const KEY = 'todos-v3';
 
-  // DOM elements
+  // DOM
+  const creator = document.getElementById('creator');
+  const creatorHeader = document.getElementById('creatorHeader');
+  const creatorToggle = document.getElementById('creatorToggle');
+  const creatorBody = document.getElementById('creatorBody');
+
   const titleEl = document.getElementById('title');
   const memoEl = document.getElementById('memo');
   const deadlineEl = document.getElementById('deadline');
@@ -434,7 +448,35 @@
     todos.forEach(t => { if (t.deadline && typeof t.deadline === 'string') t.deadline = Number(t.deadline); });
     moveExpiredIfNeeded();
     render();
+
+    // default: keep creator collapsed; but if no todos, expand to encourage creating
+    if (todos.length === 0) expandCreator();
+    else collapseCreator();
   }
+
+  // Creator toggle functions
+  function expandCreator(){
+    creatorBody.classList.remove('collapsed');
+    creatorBody.classList.add('expanded');
+    creator.setAttribute('aria-expanded','true');
+    creatorToggle.textContent = '−';
+    creatorToggle.setAttribute('aria-expanded','true');
+  }
+  function collapseCreator(){
+    creatorBody.classList.remove('expanded');
+    creatorBody.classList.add('collapsed');
+    creator.setAttribute('aria-expanded','false');
+    creatorToggle.textContent = '+';
+    creatorToggle.setAttribute('aria-expanded','false');
+  }
+  creatorHeader.addEventListener('click', (e) => {
+    e.preventDefault();
+    const isCollapsed = creatorBody.classList.contains('collapsed');
+    if (isCollapsed) expandCreator(); else collapseCreator();
+  });
+  creatorHeader.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); creatorHeader.click(); }
+  });
 
   // UI events
   addBtn.addEventListener('click', () => {
@@ -447,6 +489,8 @@
     titleEl.value = '';
     memoEl.value = '';
     deadlineEl.value = '';
+    // after adding, collapse creator to keep UI tidy on small screens
+    collapseCreator();
   });
 
   clearAllBtn.addEventListener('click', () => {
@@ -471,5 +515,3 @@
 </script>
 </body>
 </html>
-
-
